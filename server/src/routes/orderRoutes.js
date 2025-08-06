@@ -111,4 +111,103 @@ router.use(authorize('admin'));
  */
 router.put('/:id/status', updateOrderStatus);
 
+/**
+ * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Tạo đơn hàng và lấy link thanh toán MoMo
+ *     tags: [Order]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     productId:
+ *                       type: integer
+ *                     quantity:
+ *                       type: integer
+ *               customerName:
+ *                 type: string
+ *               customerPhone:
+ *                 type: string
+ *               customerDob:
+ *                 type: string
+ *                 format: date
+ *               customerAddress:
+ *                 type: string
+ *           example:
+ *             items:
+ *               - productId: 1
+ *                 quantity: 2
+ *               - productId: 2
+ *                 quantity: 1
+ *             customerName: "Nguyễn Văn A"
+ *             customerPhone: "0912345678"
+ *             customerDob: "1990-01-01"
+ *             customerAddress: "123 Đường ABC, Quận 1, TP.HCM"
+ *     responses:
+ *       200:
+ *         description: Trả về link thanh toán MoMo (payUrl)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 payUrl:
+ *                   type: string
+ *             example:
+ *               payUrl: "https://momo.vn/pay/abcxyz"
+ *       400:
+ *         description: Lỗi đầu vào hoặc sản phẩm không đủ số lượng
+ */
+
+/**
+ * @swagger
+ * /api/order:
+ *   post:
+ *     summary: Xử lý callback thanh toán
+ *     tags: [Payment]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: integer
+ *                 enum: [0, 1]
+ *                 description: 0 - thanh toán thành công, 1 - thanh toán thất bại
+ *     responses:
+ *       200:
+ *         description: Xử lý kết quả thanh toán thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Xử lý kết quả thanh toán thành công"
+ *       400:
+ *         description: Lỗi xử lý callback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Có lỗi xảy ra khi xử lý thanh toán"
+ */
+
 module.exports = router;

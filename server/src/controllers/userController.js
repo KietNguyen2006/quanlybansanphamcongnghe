@@ -1,7 +1,7 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const emailSender = require('../../support/email.sender');
+const { sendWelcomeEmail } = require('../utils/emailService');
 
 // Tạo token JWT
 const createToken = (id) => {
@@ -22,36 +22,7 @@ exports.register = async (req, res) => {
     const token = createToken(user.id);
 
     // Gửi email chúc mừng
-    try {
-      const welcomeEmail = {
-        email: user.email,
-        subject: 'Chúc mừng! Tài khoản của bạn đã được tạo thành công',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #2c3e50; text-align: center;">🎉 Chúc mừng bạn!</h2>
-            <p>Xin chào <strong>${user.username}</strong>,</p>
-            <p>Tài khoản của bạn đã được tạo thành công trên hệ thống quản lý bán hàng online.</p>
-            <div style="background-color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="color: #27ae60; margin-top: 0;">Thông tin tài khoản:</h3>
-              <p><strong>Username:</strong> ${user.username}</p>
-              <p><strong>Email:</strong> ${user.email}</p>
-              <p><strong>Vai trò:</strong> ${user.role}</p>
-            </div>
-            <p>Bạn có thể bắt đầu sử dụng hệ thống ngay bây giờ!</p>
-            <p style="color: #7f8c8d; font-size: 14px; margin-top: 30px;">
-              Trân trọng,<br>
-              Đội ngũ hỗ trợ
-            </p>
-          </div>
-        `
-      };
-      
-      await emailSender(welcomeEmail);
-      console.log('Email chúc mừng đã được gửi thành công đến:', user.email);
-    } catch (emailError) {
-      console.error('Lỗi khi gửi email chúc mừng:', emailError.message);
-      // Không throw error để không ảnh hưởng đến việc đăng ký
-    }
+    await sendWelcomeEmail(user.email, user.username);
 
     res.status(201).json({
       user: {

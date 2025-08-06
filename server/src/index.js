@@ -20,6 +20,8 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const voucherRoutes = require('./routes/voucherRoutes');
+const exportRoutes = require('./routes/exportRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 
@@ -35,14 +37,31 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/vouchers', voucherRoutes);
+app.use('/api/export', exportRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Sync database
-sequelize.sync({ alter: true })
-  .then(() => console.log('Database synced'))
-  .catch(err => console.error('Error syncing database:', err));
+// Import models để đảm bảo các model được đăng ký
+const { syncModels } = require('./models');
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Khởi động server
+const startServer = async () => {
+  try {
+    // Đồng bộ hóa database
+    await syncModels();
+    
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`\n========================================`);
+      console.log(`Server đang chạy trên cổng ${PORT}`);
+      console.log(`API Documentation: http://localhost:${PORT}/api-docs`);
+      console.log(`========================================\n`);
+    });
+  } catch (error) {
+    console.error('Không thể khởi động server:', error);
+    process.exit(1);
+  }
+};
+
+// Bắt đầu server
+startServer();

@@ -1,4 +1,9 @@
+const crypto = require('crypto');
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 const { Order, OrderItem, Product } = require('../models');
+const ExcelJS = require('exceljs');
+const { sendOrderExcelEmail } = require('../../support/email.sender');
 
 exports.createOrder = async (req, res) => {
   try {
@@ -39,6 +44,39 @@ exports.createOrder = async (req, res) => {
       await product.update({ stock: product.stock - item.quantity });
     }
 
+    // Xuất file Excel đơn hàng
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Order');
+    sheet.columns = [
+      { header: 'Tên sản phẩm', key: 'name', width: 30 },
+      { header: 'Số lượng', key: 'quantity', width: 10 },
+      { header: 'Đơn giá', key: 'price', width: 15 },
+      { header: 'Thành tiền', key: 'total', width: 20 },
+    ];
+    for (const item of items) {
+      const product = await Product.findByPk(item.productId);
+      sheet.addRow({
+        name: product.name,
+        quantity: item.quantity,
+        price: product.price,
+        total: product.price * item.quantity,
+      });
+    }
+    sheet.addRow({});
+    sheet.addRow({ name: 'Tổng cộng', total: totalAmount });
+    const buffer = await workbook.xlsx.writeBuffer();
+    // Gửi mail nếu có email
+    if (req.user && req.user.email) {
+      await sendOrderExcelEmail({
+        email: req.user.email,
+        username: req.user.username || customerName,
+        orderId: order.id,
+        excelBuffer: buffer,
+      });
+    } else if (customerName && customerPhone) {
+      // Nếu là khách chưa đăng nhập, có thể gửi qua email nhập ngoài (nếu có)
+      // (Có thể mở rộng nếu muốn)
+    }
     res.status(201).json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });

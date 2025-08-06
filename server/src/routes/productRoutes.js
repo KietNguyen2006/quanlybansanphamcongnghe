@@ -20,6 +20,30 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Danh sách sản phẩm
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *                   imageUrl:
+ *                     type: string
+ *             example:
+ *               - id: 1
+ *                 name: "Laptop Dell XPS 13"
+ *                 price: 25000000
+ *                 imageUrl: "https://example.com/xps13.jpg"
+ *               - id: 2
+ *                 name: "Chuột Logitech G102"
+ *                 price: 350000
+ *                 imageUrl: "https://example.com/g102.jpg"
  */
 router.get('/', getAllProducts);
 
@@ -188,5 +212,6 @@ router.put('/:id', updateProduct);
  *         description: Không tìm thấy sản phẩm
  */
 router.delete('/:id', deleteProduct);
+
 
 module.exports = router; 

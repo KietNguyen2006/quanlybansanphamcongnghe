@@ -48,9 +48,34 @@ router.post('/register', register);
  *                 type: string
  *               password:
  *                 type: string
+ *           example:
+ *             email: "admin@gmail.com"
+ *             password: "Abc@123"
  *     responses:
  *       200:
  *         description: Đăng nhập thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *             example:
+ *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               user:
+ *                 id: 1
+ *                 email: "admin@gmail.com"
+ *                 role: "admin"
  *       401:
  *         description: Sai email hoặc mật khẩu
  */

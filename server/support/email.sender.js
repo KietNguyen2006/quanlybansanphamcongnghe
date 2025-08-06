@@ -1,29 +1,39 @@
-const nodeMailer = require('nodemailer');
-const Configuration = require('../src/config/Configuration');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-const emailSender = async({email, subject, html}) => {
-    try {
-        const transporter = nodeMailer.createTransport({
-            host: 'smtp.gmail.com',
-            service: 'gmail',
-            auth: {
-                user: Configuration.GMAIL.USER, 
-                pass: Configuration.GMAIL.PASS
-            }
-        });
-        const message = {
-            from: Configuration.GMAIL.USER,
-            to: email,
-            subject: subject,
-            html: html
-        };
-        // Send mail
-        const info = await transporter.sendMail(message);
-        return info;
-    } catch (error) {
-        // Có thể log lỗi hoặc trả về lỗi tuỳ ý
-        throw error;
-    }
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+async function sendEmail({ email, subject, html, attachments }) {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject,
+    html,
+    attachments,
+  });
 }
 
-module.exports = emailSender;
+async function sendOrderExcelEmail({ email, username, orderId, excelBuffer }) {
+  await sendEmail({
+    email,
+    subject: `Đơn hàng #${orderId} của bạn - File Excel đính kèm`,
+    html: `<p>Xin chào <b>${username}</b>,<br>Đơn hàng #${orderId} của bạn đã được đặt thành công. File chi tiết đơn hàng đính kèm bên dưới.<br>Trân trọng!</p>`,
+    attachments: [
+      {
+        filename: `order_${orderId}.xlsx`,
+        content: excelBuffer,
+      },
+    ],
+  });
+}
+
+module.exports = {
+  sendEmail,
+  sendOrderExcelEmail,
+};
