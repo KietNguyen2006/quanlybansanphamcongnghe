@@ -4,7 +4,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "test": "node scripts/setupTestDB.js && jest --runInBand --detectOpenHandles"
   },
   "dependencies": {
     "axios": "^1.11.0",
@@ -14,7 +15,7 @@
     "exceljs": "^4.4.0",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.2.0",
+    "mysql2": "^3.14.3",
     "nodemailer": "^7.0.5",
     "sequelize": "^6.30.0",
     "swagger-jsdoc": "^6.2.8",
@@ -22,6 +23,8 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "jest": "^30.0.5",
+    "nodemon": "^2.0.22",
+    "supertest": "^7.1.4"
   }
 }

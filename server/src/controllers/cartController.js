@@ -1,120 +1,94 @@
-const { Product } = require('../models');
+const { Cart, CartItem, Product } = require('../models');
 
-// Giỏ hàng tạm thời (trong thực tế nên dùng Redis hoặc database)
-let carts = {};
+// Helper: Lấy hoặc tạo giỏ hàng cho user
+async function findOrCreateCart(userId) {
+  let cart = await Cart.findOne({ where: { userId } });
+  if (!cart) cart = await Cart.create({ userId });
+  return cart;
+}
 
+// Lấy giỏ hàng của user
 exports.getCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    const cart = carts[userId] || [];
-    
-    // Lấy thông tin chi tiết sản phẩm
-    const cartWithDetails = await Promise.all(
-      cart.map(async (item) => {
-        const product = await Product.findByPk(item.productId);
-        return {
-          ...item,
-          product: product
-        };
-      })
-    );
-
-    res.json(cartWithDetails);
+    const cart = await Cart.findOne({
+      where: { userId },
+      include: [{ model: CartItem, include: [Product] }],
+    });
+    if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// Thêm sản phẩm vào giỏ hàng
 exports.addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
     const userId = req.user.id;
-
-    // Kiểm tra sản phẩm tồn tại
     const product = await Product.findByPk(productId);
-    if (!product) {
-      return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-    }
-
-    // Kiểm tra tồn kho
-    if (product.stock < quantity) {
-      return res.status(400).json({ message: 'Sản phẩm không đủ số lượng' });
-    }
-
-    // Khởi tạo giỏ hàng nếu chưa có
-    if (!carts[userId]) {
-      carts[userId] = [];
-    }
-
-    // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
-    const existingItem = carts[userId].find(item => item.productId === productId);
-    
-    if (existingItem) {
-      existingItem.quantity += quantity;
+    if (!product) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+    if (product.stock < quantity) return res.status(400).json({ message: 'Sản phẩm không đủ số lượng' });
+    const cart = await findOrCreateCart(userId);
+    let item = await CartItem.findOne({ where: { cartId: cart.id, productId } });
+    if (item) {
+      item.quantity += quantity;
+      await item.save();
     } else {
-      carts[userId].push({
-        productId,
-        quantity,
-        price: product.price
-      });
+      item = await CartItem.create({ cartId: cart.id, productId, quantity });
     }
-
-    res.json({ message: 'Đã thêm vào giỏ hàng', cart: carts[userId] });
+    res.status(200).json(item);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
+// Cập nhật số lượng sản phẩm trong giỏ
 exports.updateCartItem = async (req, res) => {
   try {
-    const { productId } = req.params;
-    const { quantity } = req.body;
     const userId = req.user.id;
-
-    if (!carts[userId]) {
-      return res.status(404).json({ message: 'Giỏ hàng trống' });
-    }
-
-    const item = carts[userId].find(item => item.productId === parseInt(productId));
-    if (!item) {
-      return res.status(404).json({ message: 'Không tìm thấy sản phẩm trong giỏ hàng' });
-    }
-
-    // Kiểm tra tồn kho
+    const { productId, quantity } = req.body;
+    if (quantity < 1) return res.status(400).json({ message: 'Số lượng phải lớn hơn 0' });
+    const cart = await Cart.findOne({ where: { userId } });
+    if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    const item = await CartItem.findOne({ where: { cartId: cart.id, productId } });
+    if (!item) return res.status(404).json({ message: 'Không tìm thấy sản phẩm trong giỏ hàng' });
     const product = await Product.findByPk(productId);
-    if (product.stock < quantity) {
-      return res.status(400).json({ message: 'Sản phẩm không đủ số lượng' });
-    }
-
+    if (!product || product.stock < quantity) return res.status(400).json({ message: 'Sản phẩm không đủ số lượng' });
     item.quantity = quantity;
-    res.json({ message: 'Đã cập nhật giỏ hàng', cart: carts[userId] });
+    await item.save();
+    res.json(item);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
+// Xóa sản phẩm khỏi giỏ hàng
 exports.removeFromCart = async (req, res) => {
   try {
-    const { productId } = req.params;
     const userId = req.user.id;
-
-    if (!carts[userId]) {
-      return res.status(404).json({ message: 'Giỏ hàng trống' });
-    }
-
-    carts[userId] = carts[userId].filter(item => item.productId !== parseInt(productId));
-    res.json({ message: 'Đã xóa sản phẩm khỏi giỏ hàng', cart: carts[userId] });
+    const { productId } = req.body;
+    const cart = await Cart.findOne({ where: { userId } });
+    if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    const item = await CartItem.findOne({ where: { cartId: cart.id, productId } });
+    if (!item) return res.status(404).json({ message: 'Không tìm thấy sản phẩm trong giỏ hàng' });
+    await item.destroy();
+    res.json({ message: 'Đã xóa sản phẩm khỏi giỏ hàng' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
+// Xóa toàn bộ giỏ hàng
 exports.clearCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    carts[userId] = [];
-    res.json({ message: 'Đã xóa giỏ hàng' });
+    const cart = await Cart.findOne({ where: { userId } });
+    if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    await CartItem.destroy({ where: { cartId: cart.id } });
+    res.json({ message: 'Đã xóa toàn bộ giỏ hàng' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
-}; 
+};

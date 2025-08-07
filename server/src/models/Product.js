@@ -21,8 +21,23 @@ const Product = sequelize.define('Product', {
   imageUrl: {
     type: DataTypes.STRING
   },
-  category: {
-    type: DataTypes.STRING
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Category',  // Changed from 'Categories' to 'Category'
+      key: 'id'
+    },
+    field: 'category_id'  // Ensure the column name matches the database
+  },
+  brandId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Brand',  // Changed from 'Brands' to 'Brand'
+      key: 'id'
+    },
+    field: 'brand_id'  // Ensure the column name matches the database
   },
   stock: {
     type: DataTypes.INTEGER,

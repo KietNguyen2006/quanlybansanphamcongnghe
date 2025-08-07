@@ -5,7 +5,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'API Quản lý bán hàng online',
-      version: '1.0.0',
+      version: '1.1.0',
       description: `Tài liệu API cho hệ thống quản lý bán hàng online.
 
 **Các nhóm chức năng chính:**

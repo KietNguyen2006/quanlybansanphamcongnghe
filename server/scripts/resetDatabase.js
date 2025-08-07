@@ -9,7 +9,7 @@ async function resetDatabase() {
     const envFile = fs.readFileSync(envPath, 'utf8');
     const dbName = envFile.match(/DB_NAME=(.+)/)[1];
 
-    console.log('🔄 Đang xóa và tạo lại database...');
+    console.log('Đang xóa và tạo lại database...');
     
     // Tạo kết nối tới MySQL mà không chỉ định database
     const tempSequelize = new (require('sequelize'))(
@@ -28,17 +28,17 @@ async function resetDatabase() {
     await tempSequelize.getQueryInterface().createDatabase(dbName);
     await tempSequelize.close();
 
-    console.log('✅ Đã tạo lại database thành công');
-    console.log('🔄 Đang đồng bộ hóa các bảng...');
+    console.log('Đã tạo lại database thành công');
+    console.log('Đang đồng bộ hóa các bảng...');
 
     // Đồng bộ hóa tất cả các model
     const { syncModels } = require('../src/models');
     await syncModels();
 
-    console.log('✅ Đã đồng bộ hóa các bảng thành công');
+    console.log('Đã đồng bộ hóa các bảng thành công');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Lỗi khi đặt lại database:', error);
+    console.error('Lỗi khi đặt lại database:', error);
     process.exit(1);
   }
 }

@@ -12,10 +12,10 @@ async function clearDatabase() {
     // Bật lại kiểm tra khóa ngoại
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true });
 
-    console.log('✅ Đã xóa toàn bộ dữ liệu trong cơ sở dữ liệu');
+    console.log('Đã xóa toàn bộ dữ liệu trong cơ sở dữ liệu');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Lỗi khi xóa dữ liệu:', error);
+    console.error('Lỗi khi xóa dữ liệu:', error);
     process.exit(1);
   }
 }

@@ -7,6 +7,7 @@
 - **API Documentation:** Swagger UI
 
 Dự án hỗ trợ đầy đủ các chức năng quản lý sản phẩm, đơn hàng, người dùng, phân quyền, xác thực JWT, tài liệu hóa API với Swagger, gửi email tự động khi đăng ký tài khoản, và nhiều tính năng quản trị khác.
+Dự án hỗ trợ đầy đủ các chức năng quản lý sản phẩm, đơn hàng, người dùng, phân quyền, xác thực JWT, tài liệu hóa API với Swagger, gửi email tự động khi đăng ký tài khoản, quản lý danh mục/thương hiệu, voucher/khuyến mãi, đánh giá & bình luận sản phẩm, báo cáo & thống kê, thông báo, khôi phục mật khẩu, test tự động backend.
 
 ## Mô tả
 Backend hệ thống quản lý bán hàng online được xây dựng bằng Node.js + Express với MySQL làm cơ sở dữ liệu.
@@ -14,27 +15,37 @@ Backend hệ thống quản lý bán hàng online được xây dựng bằng No
 ## Tính năng
 
 ### Chức năng người dùng (User)
-- ✅ Đăng ký, đăng nhập
-- ✅ Xem danh sách sản phẩm
-- ✅ Tìm kiếm và lọc sản phẩm theo danh mục, giá
-- ✅ Xem chi tiết sản phẩm
-- ✅ Thêm sản phẩm vào giỏ hàng
-- ✅ Đặt hàng (tạo đơn hàng)
-- ✅ Xem lịch sử đơn hàng
+- Đăng ký, đăng nhập
+- Xem danh sách sản phẩm
+- Tìm kiếm và lọc sản phẩm theo danh mục, giá
+- Xem chi tiết sản phẩm
+- Thêm sản phẩm vào giỏ hàng
+- Đặt hàng (tạo đơn hàng)
+- Xem lịch sử đơn hàng
+- Đánh giá & bình luận sản phẩm
+- Nhận thông báo từ hệ thống
+- Khôi phục mật khẩu qua email
 
 ### Chức năng admin
-- ✅ Đăng nhập admin riêng
-- ✅ CRUD sản phẩm (tên, mô tả, giá, hình ảnh)
-- ✅ Quản lý đơn hàng (thay đổi trạng thái: mới → đang xử lý → đã giao)
-- ✅ Thống kê đơn hàng theo ngày / tổng doanh thu
+- Đăng nhập admin riêng
+- CRUD sản phẩm (tên, mô tả, giá, hình ảnh)
+- Quản lý đơn hàng (thay đổi trạng thái: mới → đang xử lý → đã giao)
+- Thống kê đơn hàng, doanh thu, sản phẩm bán chạy, báo cáo tổng hợp
+- Quản lý danh mục (Category) & thương hiệu (Brand)
+- Quản lý voucher/khuyến mãi
+- Quản lý đánh giá & bình luận
+- Gửi thông báo cho người dùng
+- Xem báo cáo thống kê tổng hợp
+- Quản lý khôi phục mật khẩu
+- Tự động kiểm thử backend
 
 ### Yêu cầu kỹ thuật
-- ✅ Backend: Node.js + Express, tách rõ router/controller/model
-- ✅ Database: MySQL với bảng user, product, order, order_item
-- ✅ Xác thực bằng JWT
-- ✅ Áp dụng phân quyền: người dùng và admin
-- ✅ Sử dụng Sequelize ORM để thao tác database
-- ✅ API Documentation với Swagger UI
+- Backend: Node.js + Express, tách rõ router/controller/model
+- Database: MySQL với bảng user, product, order, order_item
+- Xác thực bằng JWT
+- Áp dụng phân quyền: người dùng và admin
+- Sử dụng Sequelize ORM để thao tác database
+- API Documentation với Swagger UI
 
 ## Cấu trúc project
 
@@ -113,14 +124,23 @@ mysql -u root -p quanlybansanpham < ../database/init_database.sql
 npm run dev
 ```
 
-Server sẽ chạy tại: http://localhost:5000
-API Documentation: http://localhost:5000/api-docs
+Server sẽ chạy tại: http://localhost:3000
+API Documentation: http://localhost:3000/api-docs
+
+### Bước 6: Chạy kiểm thử tự động
+```bash
+npm test
+```
+
+Kết quả test sẽ hiển thị trên terminal. Hệ thống sử dụng Jest/Supertest để kiểm thử API tự động.
 
 ## API Endpoints
 
 ### Authentication
 - `POST /api/users/register` - Đăng ký người dùng
 - `POST /api/users/login` - Đăng nhập
+- `POST /api/users/forgot-password` - Gửi email khôi phục mật khẩu
+- `POST /api/users/reset-password` - Đặt lại mật khẩu mới
 
 ### Products
 - `GET /api/products` - Lấy danh sách sản phẩm
@@ -129,6 +149,16 @@ API Documentation: http://localhost:5000/api-docs
 - `POST /api/products` - Tạo sản phẩm (Admin)
 - `PUT /api/products/:id` - Cập nhật sản phẩm (Admin)
 - `DELETE /api/products/:id` - Xóa sản phẩm (Admin)
+
+### Category & Brand
+- `GET /api/categories` - Lấy danh mục
+- `POST /api/categories` - Thêm danh mục (Admin)
+- `PUT /api/categories/:id` - Sửa danh mục (Admin)
+- `DELETE /api/categories/:id` - Xóa danh mục (Admin)
+- `GET /api/brands` - Lấy danh sách thương hiệu
+- `POST /api/brands` - Thêm thương hiệu (Admin)
+- `PUT /api/brands/:id` - Sửa thương hiệu (Admin)
+- `DELETE /api/brands/:id` - Xóa thương hiệu (Admin)
 
 ### Cart
 - `GET /api/cart` - Lấy giỏ hàng
@@ -142,13 +172,31 @@ API Documentation: http://localhost:5000/api-docs
 - `GET /api/orders/my-orders` - Lấy đơn hàng của user
 - `PUT /api/orders/:id/status` - Cập nhật trạng thái đơn hàng (Admin)
 
-### Statistics (Admin)
+### Voucher
+- `GET /api/vouchers` - Lấy danh sách voucher
+- `POST /api/vouchers` - Thêm voucher (Admin)
+- `PUT /api/vouchers/:id` - Sửa voucher (Admin)
+- `DELETE /api/vouchers/:id` - Xóa voucher (Admin)
+
+### Review & Comment
+- `POST /api/products/:id/reviews` - Đánh giá sản phẩm
+- `GET /api/products/:id/reviews` - Xem đánh giá sản phẩm
+- `POST /api/products/:id/comments` - Bình luận sản phẩm
+- `GET /api/products/:id/comments` - Xem bình luận sản phẩm
+
+### Notification
+- `GET /api/notifications` - Xem thông báo
+- `POST /api/notifications` - Gửi thông báo (Admin)
+- `PUT /api/notifications/:id` - Đánh dấu đã đọc
+
+### Statistics & Reports (Admin)
 - `GET /api/stats/orders` - Thống kê đơn hàng
 - `GET /api/stats/top-products` - Sản phẩm bán chạy
 - `GET /api/stats/daily` - Thống kê theo ngày
 - `GET /api/stats/all-orders` - Danh sách tất cả đơn hàng
+- `GET /api/reports/products` - Báo cáo doanh thu theo sản phẩm
 
-## Cấu trúc Database
+## Cấu trúc Database (cơ bản)
 
 ### Bảng Users
 - id (Primary Key)
@@ -163,8 +211,19 @@ API Documentation: http://localhost:5000/api-docs
 - description
 - price
 - imageUrl
-- category
+- categoryId (Foreign Key)
+- brandId (Foreign Key)
 - stock
+
+### Bảng Categories
+- id (Primary Key)
+- name
+- description
+
+### Bảng Brands
+- id (Primary Key)
+- name
+- description
 
 ### Bảng Orders
 - id (Primary Key)
@@ -178,6 +237,45 @@ API Documentation: http://localhost:5000/api-docs
 - productId (Foreign Key)
 - quantity
 - price
+
+### Bảng Cart
+- id (Primary Key)
+- userId (Foreign Key)
+
+### Bảng CartItems
+- id (Primary Key)
+- cartId (Foreign Key)
+- productId (Foreign Key)
+- quantity
+
+### Bảng Vouchers
+- id (Primary Key)
+- code
+- discount
+- expiryDate
+
+### Bảng Reviews
+- id (Primary Key)
+- productId (Foreign Key)
+- userId (Foreign Key)
+- rating
+- comment
+- createdAt
+
+### Bảng Comments
+- id (Primary Key)
+- productId (Foreign Key)
+- userId (Foreign Key)
+- content
+- createdAt
+
+### Bảng Notifications
+- id (Primary Key)
+- userId (Foreign Key, nullable)
+- title
+- content
+- isRead
+- createdAt
 
 ## Authentication
 
@@ -212,6 +310,6 @@ Sau khi khởi tạo database, tài khoản admin mặc định:
 
 ## Tác giả
 - **Backend:** Nguyễn Xuân Anh Kiệt
-
+- **Frontend:** Nguyễn Nhật Anh
 ## License
 MIT License 
