@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "akstorei_firebasekiet",
+    "password": "Kiet15052006",
+    "database": "akstorei_quanlybansanphamcongnghe",
+    "host": "103.130.217.240",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "akstorei_firebasekiet",
+    "password": "Kiet15052006",
+    "database": "akstorei_quanlybansanphamcongnghe",
+    "host": "103.130.217.240",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "akstorei_firebasekiet",
+    "password": "Kiet15052006",
+    "database": "akstorei_quanlybansanphamcongnghe",
+    "host": "103.130.217.240",
+    "dialect": "mysql"
+  }
+}

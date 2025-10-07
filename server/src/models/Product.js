@@ -1,48 +1,48 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+'use strict';
+const { Model } = require('sequelize');
 
-const Product = sequelize.define('Product', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT
-  },
-  price: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
-  },
-  imageUrl: {
-    type: DataTypes.STRING
-  },
-  categoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Category',  // Changed from 'Categories' to 'Category'
-      key: 'id'
-    },
-    field: 'category_id'  // Ensure the column name matches the database
-  },
-  brandId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Brand',  // Changed from 'Brands' to 'Brand'
-      key: 'id'
-    },
-    field: 'brand_id'  // Ensure the column name matches the database
-  },
-  stock: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
+module.exports = (sequelize, DataTypes) => {
+  class Product extends Model {
+    static associate(models) {
+      Product.hasMany(models.ProductVariant, {
+        foreignKey: 'productId',
+        as: 'variants',
+        onDelete: 'CASCADE',
+      });
+      Product.hasMany(models.Specification, {
+        foreignKey: 'productId',
+        as: 'specifications',
+        onDelete: 'CASCADE',
+      });
+      Product.belongsTo(models.Category, {
+        foreignKey: 'categoryId',
+        as: 'category',
+        onDelete: 'SET NULL',
+      });
+      Product.belongsTo(models.Brand, {
+        foreignKey: 'brandId',
+        as: 'brand',
+        onDelete: 'SET NULL',
+      });
+    }
   }
-});
-
-module.exports = Product;
+  Product.init({
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+    },
+    isPublished: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  }, {
+    sequelize,
+    modelName: 'Product',
+    tableName: 'products',
+    underscored: true,
+  });
+  return Product;
+};

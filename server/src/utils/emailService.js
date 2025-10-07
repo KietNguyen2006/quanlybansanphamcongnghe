@@ -15,12 +15,12 @@ const transporter = nodemailer.createTransport({
  */
 const sendWelcomeEmail = async (to, username) => {
   const mailOptions = {
-    from: '"WETECH" <nxak1505@gmail.com>', 
+    from: '"AKSTORE" <nxak1505@gmail.com>', 
     to: to,
-    subject: 'Chào mừng bạn đã đến với WETECH!',
+    subject: 'Chào mừng bạn đã đến với AKSTORE!',
     html: `
       <h1>Chào mừng, ${username}!</h1>
-      <h3>Chúc mừng bạn đã chính thức đến với WETECH – nơi hội tụ của những sản phẩm công nghệ đỉnh cao và những trải nghiệm mua sắm mượt mà như chip Snapdragon!</h3>
+      <h3>Chúc mừng bạn đã chính thức đến với AKSTORE – nơi hội tụ của những sản phẩm công nghệ đỉnh cao và những trải nghiệm mua sắm mượt mà như chip Snapdragon!</h3>
 
 Tài khoản của bạn đã được tạo thành công:
 
@@ -35,11 +35,11 @@ Giờ đây, bạn đã có thể:
 <p> Nếu có bất kỳ câu hỏi nào, đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn 24/7.  
 📩 Liên hệ ngay: [nxak1505@gmail.com] | ☎️ Hotline: [0794757515]
 
-<p>Cảm ơn bạn đã tin tưởng và lựa chọn WETECH.  
+<p>Cảm ơn bạn đã tin tưởng và lựa chọn AKSTORE.  
 <p>Cùng nhau, chúng ta sẽ làm nên những trải nghiệm công nghệ tuyệt vời hơn mỗi ngày.</p></p>
 
 <p>Trân trọng,  
-<p>WETECH Team</p>
+<p>AKSTORE Team</p>
 
 --- 
 

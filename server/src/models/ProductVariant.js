@@ -2,47 +2,48 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class OrderItem extends Model {
+  class ProductVariant extends Model {
     static associate(models) {
-      OrderItem.belongsTo(models.Order, {
-        foreignKey: 'orderId',
+      ProductVariant.belongsTo(models.Product, {
+        foreignKey: 'productId',
         onDelete: 'CASCADE',
       });
-      OrderItem.belongsTo(models.ProductVariant, {
+      ProductVariant.hasMany(models.OrderItem, {
         foreignKey: 'productVariantId',
-        as: 'productVariant',
         onDelete: 'CASCADE',
       });
     }
   }
-  OrderItem.init({
+  ProductVariant.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    orderId: {
+    productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    productVariantId: {
-      type: DataTypes.INTEGER,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    stock: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    imageUrl: {
+      type: DataTypes.STRING,
+    },
   }, {
     sequelize,
-    modelName: 'OrderItem',
-    tableName: 'order_items',
+    modelName: 'ProductVariant',
+    tableName: 'product_variants',
     underscored: true,
   });
-  return OrderItem;
+  return ProductVariant;
 };

@@ -1,7 +1,17 @@
-const { DataTypes } = require('sequelize');
+'use strict';
+const { Model } = require('sequelize');
 
-module.exports = (sequelize) => {
-  const Brand = sequelize.define('Brand', {
+module.exports = (sequelize, DataTypes) => {
+  class Brand extends Model {
+    static associate(models) {
+      Brand.hasMany(models.Product, {
+        foreignKey: 'brandId',
+        as: 'products',
+        onDelete: 'SET NULL',
+      });
+    }
+  }
+  Brand.init({
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -12,9 +22,10 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
   }, {
-    tableName: 'Brand',  // Explicitly set table name to singular
-    timestamps: true,    // Enable timestamps (createdAt, updatedAt)
-    underscored: true    // Use snake_case for column names
+    sequelize,
+    modelName: 'Brand',
+    tableName: 'brands',
+    underscored: true,
   });
   return Brand;
 };

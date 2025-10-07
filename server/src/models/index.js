@@ -1,167 +1,54 @@
-const sequelize = require('../config/database');
-const User = require('./User');
-const Product = require('./Product');
-const Order = require('./Order');
-const OrderItem = require('./OrderItem');
-const Voucher = require('./Voucher');
-const Cart = require('./Cart')(sequelize);
-const CartItem = require('./CartItem')(sequelize);
-const Category = require('./Category')(sequelize);
-const Brand = require('./Brand')(sequelize);
-const Review = require('./Review')(sequelize);
-const Comment = require('./Comment')(sequelize);
-const Notification = require('./Notification')(sequelize);
-const PasswordResetToken = require('./PasswordResetToken')(sequelize);
+'use strict';
 
-// Thiết lập các mối quan hệ
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const config = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
+const db = {};
 
-// User có 1 Cart
-User.hasOne(Cart, {
-  foreignKey: 'userId',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE',
-});
-Cart.belongsTo(User, {
-  foreignKey: 'userId',
-  onDelete: 'CASCADE',
-});
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
-// Cart có nhiều CartItem
-Cart.hasMany(CartItem, {
-  foreignKey: 'cartId',
-  as: 'items',
-  onDelete: 'CASCADE',
-});
-CartItem.belongsTo(Cart, {
-  foreignKey: 'cartId',
-  onDelete: 'CASCADE',
-});
+fs
+  .readdirSync(__dirname)
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1
+    );
+  })
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
 
-// CartItem liên kết với Product
-CartItem.belongsTo(Product, {
-  foreignKey: 'productId',
-  as: 'product',
-  onDelete: 'CASCADE',
-});
-Product.hasMany(CartItem, {
-  foreignKey: 'productId',
-  onDelete: 'CASCADE',
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
 });
 
-// User có nhiều Order
-User.hasMany(Order, {
-  foreignKey: 'userId',
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE'
-});
-Order.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user',
-  onDelete: 'SET NULL'
-});
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
-// Order có nhiều OrderItem
-Order.hasMany(OrderItem, {
-  foreignKey: 'orderId',
-  as: 'items',
-  onDelete: 'CASCADE'
-});
-OrderItem.belongsTo(Order, {
-  foreignKey: 'orderId',
-  onDelete: 'CASCADE'
-});
-
-// Product có nhiều OrderItem
-Product.hasMany(OrderItem, {
-  foreignKey: 'productId',
-  onDelete: 'CASCADE',
-});
-OrderItem.belongsTo(Product, {
-  foreignKey: 'productId',
-  as: 'product',
-  onDelete: 'CASCADE'
-});
-
-// Voucher có thể được sử dụng trong nhiều Order (tùy chọn)
-Voucher.hasMany(Order, {
-  foreignKey: 'voucherId',
-  onDelete: 'SET NULL'
-});
-Order.belongsTo(Voucher, {
-  foreignKey: 'voucherId',
-  as: 'voucher',
-  onDelete: 'SET NULL'
-});
-
-// Đồng bộ hóa các model với database
-const syncModels = async () => {
-  const isTestEnv = process.env.NODE_ENV === 'test';
-  const forceSync = isTestEnv; // Force sync in test environment
-  const alter = !isTestEnv && process.env.NODE_ENV !== 'production'; // Use alter in non-test development
-
-  console.log(`\nStarting database synchronization...`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Force sync: ${forceSync}`);
-  console.log(`Alter tables: ${alter}\n`);
-
+// Add the syncModels function and export it
+db.syncModels = async () => {
   try {
-    // Log all models being synced in test environment
-    if (isTestEnv) {
-      console.log('Models to be synchronized:');
-      Object.keys(sequelize.models).forEach(modelName => {
-        console.log(`- ${modelName}`);
-      });
-      console.log('');
-    }
-
-    // Disable foreign key checks during sync
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-
-    // Sync all models with force: true in test environment
-    await sequelize.sync({ 
-      force: forceSync,
-      alter: alter,
-      logging: isTestEnv ? console.log : false,
-      benchmark: isTestEnv
-    });
-
-    // Re-enable foreign key checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-
-    console.log('Database synchronized successfully');
-    return true;
+    // Using { alter: true } to avoid permission issues with DROP TABLE
+    await sequelize.sync({ alter: true });
+    console.log('Database synchronized successfully (with alter:true).');
   } catch (error) {
-    console.error('Error synchronizing database:');
-    console.error(error.message);
-    
-    if (error.original) {
-      console.error('Original error:', error.original);
-    }
-    
-    // For test environment, fail fast
-    if (isTestEnv) {
-      console.error('\nTest database synchronization failed. Exiting...');
-      process.exit(1);
-    }
-    
-    return false;
+    console.error('Error synchronizing database:', error);
+    throw error;
   }
 };
 
-module.exports = {
-  sequelize,
-  Cart,
-  CartItem,
-  User,
-  Product,
-  Order,
-  OrderItem,
-  Voucher,
-  Category,
-  Brand,
-  Review,
-  Comment,
-  Notification,
-  PasswordResetToken,
-  syncModels
-};
+module.exports = db;

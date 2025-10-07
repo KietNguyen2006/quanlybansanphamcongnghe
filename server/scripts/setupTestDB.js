@@ -1,73 +1,41 @@
 const mysql = require('mysql2/promise');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.test') });
-const { sequelize } = require('../src/models');
+
+// Use the same config file as the application
+const config = require(path.join(__dirname, '..', 'src', 'config', 'config.json')).test;
+
+const TEST_DB_NAME = config.database;
 
 async function setupTestDatabase() {
-  console.log('Setting up test database...');
-  
-  // Create a connection to MySQL server (without specifying a database)
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    multipleStatements: true
-  });
+  console.log(`Verifying connection to test database '${TEST_DB_NAME}'...'`);
 
+  let connection;
   try {
-    console.log('🔌 Connecting to MySQL server...');
-    
-    // Create database if it doesn't exist
-    await connection.query(
-      `CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\` 
-       CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
-    );
-    
-    console.log(`Database '${process.env.DB_NAME}' created or already exists`);
-    
-    // Switch to the test database
-    await connection.query(`USE \`${process.env.DB_NAME}\``);
-    
-    console.log('Successfully connected to test database');
-    
-    // Tạm tắt kiểm tra khóa ngoại
-    await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    
-    // Đồng bộ hóa các model
-    console.log('Syncing database models...');
-    
-    // Bật log để xem các câu lệnh SQL
-    console.log('Model names:', Object.keys(sequelize.models).join(', '));
-    
-    try {
-      await sequelize.sync({ 
-        force: true,
-        logging: console.log // Bật log SQL
-      });
-    } catch (syncError) {
-      console.error('Sync error details:', syncError);
-      throw syncError;
-    }
-    
-    // Bật lại kiểm tra khóa ngoại
-    await connection.query('SET FOREIGN_KEY_CHECKS = 1');
-    
-    console.log('Test database synchronized successfully');
-    process.exit(0);
+    // Connect directly to the test database to verify it exists and is accessible
+    connection = await mysql.createConnection({
+      host: config.host,
+      port: config.port || 3306,
+      user: config.username,
+      password: config.password,
+      database: TEST_DB_NAME, // Specify the test database directly
+    });
+
+    console.log(`Successfully connected to test database '${TEST_DB_NAME}'.`);
+
   } catch (error) {
-    console.error('Error setting up test database:');
-    console.error(error.message);
-    
+    console.error('Fatal error connecting to test database:', error.message);
     if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-      console.log('\nAccess denied. Please check your database credentials in .env.test');
-      console.log('Make sure the specified user has permissions to create databases.');
+      console.error(`\nAccess denied. Please ensure the user '${config.username}' has ALL PRIVILEGES on the '${TEST_DB_NAME}' database.`);
+    } else if (error.code === 'ER_BAD_DB_ERROR') {
+      console.error(`\nDatabase '${TEST_DB_NAME}' does not exist. Please create it via your hosting control panel and assign the user '${config.username}' to it.`);
     } else if (error.code === 'ECONNREFUSED') {
-      console.log('\nConnection refused. Please check if MySQL server is running.');
-      console.log('You can start the MySQL service with: net start mysql');
+      console.error('\nConnection refused. Please check if the MySQL server is running and accessible.');
     }
-    
     process.exit(1);
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 }
 
