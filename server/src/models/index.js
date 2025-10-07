@@ -42,11 +42,11 @@ db.Sequelize = Sequelize;
 // Add the syncModels function and export it
 db.syncModels = async () => {
   try {
-    // Using { alter: true } to avoid permission issues with DROP TABLE
-    await sequelize.sync({ alter: true });
-    console.log('Database synchronized successfully (with alter:true).');
+    // Disabled sequelize.sync to prevent altering the database on startup.
+    // await sequelize.sync({ alter: true });
+    console.log('Database synchronization is disabled. The application will use the existing schema.');
   } catch (error) {
-    console.error('Error synchronizing database:', error);
+    console.error('Error during (disabled) database synchronization:', error);
     throw error;
   }
 };

@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
+const { User } = require('./models');
 const sequelize = require('./config/database');
-const User = require('./models/User');
 
 async function createOrUpdateAdmin() {
-  await sequelize.sync();
+  await sequelize.sync({ alter: true }); // Sync database schema
   const email = 'nxak1505@gmail.com';
-  const password = 'Kiet15052006@';
+  const password = 'Akstore2006@lhu';
   const hash = await bcrypt.hash(password, 10);
   let admin = await User.findOne({ where: { email } });
   if (admin) {
@@ -19,7 +19,6 @@ async function createOrUpdateAdmin() {
       email,
       password: hash,
       role: 'admin',
-      status: 'active',
     });
     console.log('Đã tạo admin mới:', email);
   }

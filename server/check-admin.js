@@ -10,7 +10,7 @@ async function checkAndCreateAdmin() {
     console.log('Kết nối database thành công!');
 
     // Kiểm tra xem có user admin nào không
-    const adminUser = await User.findOne({ where: { email: 'admindepchai@gmail.com' } });
+    const adminUser = await User.findOne({ where: { email: 'nxak1505@gmail.com' } });
     
     if (adminUser) {
       console.log('Tài khoản admin đã tồn tại:');
@@ -19,9 +19,9 @@ async function checkAndCreateAdmin() {
       console.log('Role:', adminUser.role);
       
       // Kiểm tra mật khẩu
-      const testPassword = 'admindepchai';
+      const testPassword = 'Kiet15052006@';
       const isPasswordValid = await bcrypt.compare(testPassword, adminUser.password);
-      console.log('Mật khẩu "admindepchai" có hợp lệ:', isPasswordValid);
+      console.log('Mật khẩu "Kiet15052006@" có hợp lệ:', isPasswordValid);
       
       if (!isPasswordValid) {
         console.log('Cập nhật mật khẩu cho admin...');
@@ -33,11 +33,11 @@ async function checkAndCreateAdmin() {
     } else {
       console.log('Tạo tài khoản admin mới...');
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('admindepchai', salt);
+      const hashedPassword = await bcrypt.hash('KietNguyen', salt);
       
       const newAdmin = await User.create({
-        username: 'admindepchai',
-        email: 'admindepchai@gmail.com',
+        username: 'KietNguyen',
+        email: 'nxak1505@gmail.com',
         password: hashedPassword,
         role: 'admin'
       });

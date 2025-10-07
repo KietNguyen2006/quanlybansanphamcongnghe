@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', routes);
 
 // Swagger API docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs-v2', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 db.sequelize.sync()
   .then(() => {

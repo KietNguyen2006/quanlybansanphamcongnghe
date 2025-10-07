@@ -4,32 +4,48 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Quản lý bán hàng online',
+      title: 'Hệ thống quản lý bán hàng online - Backend',
       version: '1.1.0',
-      description: `Tài liệu API cho hệ thống quản lý bán hàng online.
+      description: `Đây là tài liệu API cho backend của hệ thống quản lý bán hàng online.
 
-**Các nhóm chức năng chính:**
-- User: Đăng ký, đăng nhập, phân quyền, quản lý tài khoản
-- Product: Quản lý sản phẩm, tìm kiếm, lọc, phân trang
-- Order: Đặt hàng, quản lý đơn hàng, và thanh toán
-- Cart: Quản lý giỏ hàng
-- Stats: Thống kê, báo cáo
-- Voucher: Quản lý mã giảm giá
+**Công nghệ sử dụng:**
+- **Backend:** Node.js, Express, Sequelize
+- **Database:** MySQL
+- **API Documentation:** Swagger UI
 
-**Phân quyền:**
-- Một số endpoint yêu cầu JWT (bearer token) và quyền admin/user. Xem mục security trong từng endpoint.
+---
 
-**Response mẫu:**
-- Các response đều trả về JSON, có thể gồm message, data, error, ...
+### Chức năng người dùng (User)
+- Đăng ký, đăng nhập
+- Xem danh sách sản phẩm
+- Tìm kiếm và lọc sản phẩm theo danh mục, giá
+- Xem chi tiết sản phẩm
+- Thêm sản phẩm vào giỏ hàng
+- Đặt hàng (tạo đơn hàng)
+- Xem lịch sử đơn hàng
+- Đánh giá & bình luận sản phẩm
+- Nhận thông báo từ hệ thống
+- Khôi phục mật khẩu qua email
 
-**Hướng dẫn sử dụng:**
-- Đăng nhập để lấy token, nhấn Authorize trên Swagger UI để test các endpoint bảo vệ.
-- Tham khảo ví dụ request/response trong từng endpoint.
+### Chức năng quản trị viên (Admin)
+- Đăng nhập admin riêng
+- CRUD sản phẩm (tên, mô tả, giá, hình ảnh)
+- Quản lý đơn hàng (thay đổi trạng thái: mới → đang xử lý → đã giao)
+- Thống kê đơn hàng, doanh thu, sản phẩm bán chạy, báo cáo tổng hợp
+- Quản lý danh mục (Category) & thương hiệu (Brand)
+- Quản lý voucher/khuyến mãi
+- Quản lý đánh giá & bình luận
+- Gửi thông báo cho người dùng
 `,
+      contact: {
+        name: "Nguyễn Xuân Anh Kiệt",
+        email: "nxak1505@gmail.com"
+      }
     },
     servers: [
       {
         url: 'http://localhost:3000',
+        description: 'Development server'
       },
     ],
     components: {
@@ -43,9 +59,9 @@ const options = {
     },
     security: [{ bearerAuth: [] }],
   },
-  apis: ['./src/routes/*.js'], // Quét các file route để lấy swagger comment
+  apis: ['./src/routes/*.js', './src/app.js'],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
-module.exports = swaggerSpec; 
+module.exports = swaggerSpec;
